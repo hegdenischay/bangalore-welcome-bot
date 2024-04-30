@@ -14,11 +14,12 @@ from nio import (
     MegolmEvent,
     RoomMessageText,
     UnknownEvent,
+    RoomMemberEvent,
 )
 
-from my_project_name.callbacks import Callbacks
-from my_project_name.config import Config
-from my_project_name.storage import Storage
+from bangalore_bot.callbacks import Callbacks
+from bangalore_bot.config import Config
+from bangalore_bot.storage import Storage
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,8 @@ async def main():
     # Set up event callbacks
     callbacks = Callbacks(client, store, config)
     client.add_event_callback(callbacks.message, (RoomMessageText,))
+    # add callback on roommember
+    client.add_event_callback(callbacks.user_invited, (RoomMemberEvent,))
     client.add_event_callback(
         callbacks.invite_event_filtered_callback, (InviteMemberEvent,)
     )

@@ -88,6 +88,18 @@ class Storage:
             (0,),
         )
 
+        self._execute(
+                """
+                CREATE TABLE messages (
+                    id INTEGER PRIMARY KEY
+                    room_id VARCHAR
+                    sender VARCHAR
+                    message VARCHAR
+                    timestamp INTEGER
+                )
+                """
+                )
+
         # Set up any other necessary database tables here
 
         logger.info("Database setup complete")

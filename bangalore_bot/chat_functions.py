@@ -19,7 +19,7 @@ async def send_text_to_room(
     client: AsyncClient,
     room_id: str,
     message: str,
-    notice: bool = True,
+    notice: bool = False,
     markdown_convert: bool = True,
     reply_to_event_id: Optional[str] = None,
 ) -> Union[RoomSendResponse, ErrorResponse]:
@@ -68,6 +68,48 @@ async def send_text_to_room(
         )
     except SendRetryError:
         logger.exception(f"Unable to send message response to {room_id}")
+
+async def send_text_with_mention(
+    client: AsyncClient,
+    room_id: str,
+    formatted_message: str,
+    message: str,
+    sender: str,
+) -> Union[RoomSendResponse, ErrorResponse]:
+    """Send text to a matrix room with mentions.
+
+    Args:
+        client: The client to communicate to matrix with.
+
+        room_id: The ID of the room to send the message to.
+
+        message: The message content.
+
+    Returns:
+        A RoomSendResponse if the request was successful, else an ErrorResponse.
+    """
+    # Determine whether to ping room members or not
+    content = {
+        "msgtype": "m.text",
+        "format": "org.matrix.custom.html",
+        "body": message,
+        "formatted_body": formatted_message,
+        "m.mentions" : {
+            "user_ids": [
+                    sender
+                ]
+            },
+    }
+    try:
+        return await client.room_send(
+            room_id,
+            "m.room.message",
+            content,
+            ignore_unverified_devices=True,
+        )
+    except SendRetryError:
+        logger.exception(f"Unable to send message response to {room_id}")
+
 
 
 def make_pill(user_id: str, displayname: str = None) -> str:

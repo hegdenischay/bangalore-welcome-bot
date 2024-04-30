@@ -3,11 +3,11 @@ Description=A matrix bot that does amazing things!
 
 [Service]
 Type=simple
-User=my-project-name
-Group=my-project-name
-WorkingDirectory=/path/to/my-project-name/docker
-ExecStart=/usr/bin/docker-compose up my-project-name
-ExecStop=/usr/bin/docker-compose stop my-project-name
+User=bangalore-bot
+Group=bangalore-bot
+WorkingDirectory=/path/to/bangalore-bot/docker
+ExecStart=/usr/bin/docker-compose up bangalore-bot
+ExecStop=/usr/bin/docker-compose stop bangalore-bot
 RemainAfterExit=yes
 Restart=always
 RestartSec=3

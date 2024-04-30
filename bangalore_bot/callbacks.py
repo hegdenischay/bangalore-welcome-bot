@@ -1,4 +1,5 @@
 import logging
+import json
 
 from nio import (
     AsyncClient,
@@ -9,13 +10,14 @@ from nio import (
     RoomGetEventError,
     RoomMessageText,
     UnknownEvent,
+    RoomMemberEvent,
 )
 
-from my_project_name.bot_commands import Command
-from my_project_name.chat_functions import make_pill, react_to_event, send_text_to_room
-from my_project_name.config import Config
-from my_project_name.message_responses import Message
-from my_project_name.storage import Storage
+from bangalore_bot.bot_commands import Command
+from bangalore_bot.chat_functions import make_pill, react_to_event, send_text_to_room, send_text_with_mention
+from bangalore_bot.config import Config
+from bangalore_bot.message_responses import Message
+from bangalore_bot.storage import Storage
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +78,48 @@ class Callbacks:
 
         command = Command(self.client, self.store, self.config, msg, room, event)
         await command.process()
+
+    async def user_invited(self, room: MatrixRoom, event: RoomMemberEvent) -> None:
+        """ Callback for when user is invited in room"""
+        membership = event.membership
+        # only care about joins
+        sender = event.state_key
+        visited = json.loads(open("visited.json", 'r').read())
+        try:
+            sender_name = event.content['displayname']
+            if "(WhatsApp)" in sender_name:
+                sender_name = sender_name.replace("(WhatsApp)", "")
+        except:
+            sender_name = ""
+        # check if content avatar_url and prev_content avatar_url are the same
+        try:
+            new_avatar = event.content['avatar_url']
+            logger.info(event.content)
+        except KeyError:
+            new_avatar = ""
+        try:
+            old_avatar = event.prev_content['avatar_url']
+            logger.info(event.prev_content)
+            return
+        except (KeyError, TypeError):
+            old_avatar = ""
+        if new_avatar != old_avatar:
+            return
+        if membership == "join" and "bangalorebot" not in sender and sender not in visited:
+            # send invititation message
+            formatted_message = f"Hi <a href=\"https://matrix.to/#/{sender.replace('@', '%40').replace(':', '%3A')}\">{sender_name}</a>, welcome to our community!\n\nPlease introduce yourself :)\n\nTell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)"
+            message = f"Hi {sender_name}, welcome to our community!\n\nPlease introduce yourself :)\n\nTell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)"
+            await send_text_with_mention(
+                self.client,
+                room.room_id,
+                formatted_message,
+                message,
+                sender,
+            )
+            visited[sender] = True
+        with open("visited.json", 'w') as fp:
+            fp.write(json.dumps(visited))
+
 
     async def invite(self, room: MatrixRoom, event: InviteMemberEvent) -> None:
         """Callback for when an invite is received. Join the room specified in the invite.
