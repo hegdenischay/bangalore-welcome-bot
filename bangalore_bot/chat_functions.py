@@ -69,6 +69,7 @@ async def send_text_to_room(
     except SendRetryError:
         logger.exception(f"Unable to send message response to {room_id}")
 
+
 async def send_text_with_mention(
     client: AsyncClient,
     room_id: str,
@@ -96,9 +97,9 @@ async def send_text_with_mention(
         "formatted_body": formatted_message,
         "m.mentions" : {
             "user_ids": [
-                    sender
-                ]
-            },
+                sender
+            ]
+        },
     }
     try:
         return await client.room_send(
@@ -109,7 +110,6 @@ async def send_text_with_mention(
         )
     except SendRetryError:
         logger.exception(f"Unable to send message response to {room_id}")
-
 
 
 def make_pill(user_id: str, displayname: str = None) -> str:

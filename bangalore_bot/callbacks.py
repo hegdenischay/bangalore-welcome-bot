@@ -1,5 +1,4 @@
 import logging
-import json
 
 from nio import (
     AsyncClient,
@@ -43,13 +42,13 @@ class Callbacks:
         and check if current event shows a new user, otherwise ignore
         """
 
-        #check if file exists with room_id, if not, create one
+        # check if file exists with room_id, if not, create one
         file_format = f"struct_file_{room.room_id}"
         file_path = os.path.join(os.getcwd(), file_format)
         if not os.path.exists(file_path):
             # file does not exist, just dump it and say no
             with open(file_path, 'w') as fp:
-                # group_name_structure is a tuple 
+                # group_name_structure is a tuple
                 # with the second element being the users in said room
                 for id in room.group_name_structure()[1]:
                     fp.write(f"{id}\n")
@@ -61,7 +60,6 @@ class Callbacks:
                 if event.sender in group_struct:
                     return False
         return True
-
 
     async def message(self, room: MatrixRoom, event: RoomMessageText) -> None:
         """Callback for when a message event is received
@@ -114,7 +112,7 @@ class Callbacks:
             sender_name = event.content['displayname']
             if "(WhatsApp)" in sender_name:
                 sender_name = sender_name.replace("(WhatsApp)", "")
-        except:
+        except KeyError:
             sender_name = ""
         # returns true if new user, false if not
         res = self.check_if_new_user(room, event)
@@ -129,10 +127,9 @@ class Callbacks:
                 message,
                 sender,
             )
-            #visited[sender] = True
-        #with open("visited.json", 'w') as fp:
+            # visited[sender] = True
+        # with open("visited.json", 'w') as fp:
         #    fp.write(json.dumps(visited))
-
 
     async def invite(self, room: MatrixRoom, event: InviteMemberEvent) -> None:
         """Callback for when an invite is received. Join the room specified in the invite.
@@ -266,4 +263,3 @@ class Callbacks:
         logger.debug(
             f"Got unknown event with type to {event.type} from {event.sender} in {room.room_id}."
         )
-

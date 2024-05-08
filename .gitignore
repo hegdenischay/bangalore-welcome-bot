@@ -5,6 +5,7 @@
 env/
 env3/
 .env/
+.venv/
 
 # Bot local files
 *.db
