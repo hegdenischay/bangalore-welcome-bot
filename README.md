@@ -1,3 +1,16 @@
+# Newbies bot
+
+- Created with matrix-nio and nio-template
+- Creates a welcome message when someone new joins
+- Connects to WhatsApp using [mautrix/whatsapp](https://github.com/mautrix/whatsapp)
+- PRs welcome.
+- If you want to see how messages are sent, [here](https://github.com/hegdenischay/bangalore-welcome-bot/blob/master/bangalore_bot/callbacks.py#L82)
+
+# but wot is a "matrix"?
+
+- It's a chat protocol, kinda like email (or IRC, if you know that)
+- Lets me write one bot and use it in multiple platforms
+
 # Nio Template [![Built with matrix-nio](https://img.shields.io/badge/built%20with-matrix--nio-brightgreen)](https://github.com/poljar/matrix-nio) <a href="https://matrix.to/#/#nio-template:matrix.org"><img src="https://img.shields.io/matrix/nio-template:matrix.org?color=blue&label=Join%20the%20Matrix%20Room&server_fqdn=matrix-client.matrix.org" /></a>
 
 A template for creating bots with
