@@ -1,4 +1,5 @@
 import logging
+import json
 
 from nio import (
     AsyncClient,
@@ -17,7 +18,6 @@ from bangalore_bot.chat_functions import make_pill, react_to_event, send_text_to
 from bangalore_bot.config import Config
 from bangalore_bot.message_responses import Message
 from bangalore_bot.storage import Storage
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -36,30 +36,6 @@ class Callbacks:
         self.store = store
         self.config = config
         self.command_prefix = config.command_prefix
-
-    def check_if_new_user(self, room: MatrixRoom, event: RoomMemberEvent) -> bool:
-        """ Create a text file with users in said room,
-        and check if current event shows a new user, otherwise ignore
-        """
-
-        # check if file exists with room_id, if not, create one
-        file_format = f"struct_file_{room.room_id}"
-        file_path = os.path.join(os.getcwd(), file_format)
-        if not os.path.exists(file_path):
-            # file does not exist, just dump it and say no
-            with open(file_path, 'w') as fp:
-                # group_name_structure is a tuple
-                # with the second element being the users in said room
-                for id in room.group_name_structure()[1]:
-                    fp.write(f"{id}\n")
-            return False
-        else:
-            # read from the file
-            with open(file_path, 'r') as fp:
-                group_struct = fp.read().split('\n')
-                if event.sender in group_struct:
-                    return False
-        return True
 
     async def message(self, room: MatrixRoom, event: RoomMessageText) -> None:
         """Callback for when a message event is received
@@ -108,15 +84,26 @@ class Callbacks:
         membership = event.membership
         # only care about joins
         sender = event.state_key
+        visited = json.loads(open("visited.json", 'r').read())
         try:
             sender_name = event.content['displayname']
             if "(WhatsApp)" in sender_name:
                 sender_name = sender_name.replace("(WhatsApp)", "")
-        except KeyError:
+        except:
             sender_name = ""
-        # returns true if new user, false if not
-        res = self.check_if_new_user(room, event)
-        if membership == "join" and "bangalorebot" not in sender and res:
+        # check if content avatar_url and prev_content avatar_url are the same
+        #try:
+        #    new_avatar = event.content['avatar_url']
+        #    logger.info(event.content)
+        #except KeyError:
+        #    new_avatar = ""
+        try:
+            old_event = event.prev_content['membership']
+            logger.info(event)
+        except (KeyError, TypeError):
+            old_event = ""
+        # directly inferred from https://spec.matrix.org/v1.8/client-server-api/#mroommember
+        if membership == "join" and old_event == "invite" and "bangalorebot" not in sender and sender not in visited:
             # send invititation message
             formatted_message = f"Hi <a href=\"https://matrix.to/#/{sender.replace('@', '%40').replace(':', '%3A')}\">{sender_name}</a>, welcome to our community!\n\nPlease introduce yourself :)\n\nTell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)"
             message = f"Hi {sender_name}, welcome to our community!\n\nPlease introduce yourself :)\n\nTell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)"
@@ -127,9 +114,10 @@ class Callbacks:
                 message,
                 sender,
             )
-            # visited[sender] = True
-        # with open("visited.json", 'w') as fp:
-        #    fp.write(json.dumps(visited))
+            visited[sender] = True
+        with open("visited.json", 'w') as fp:
+            fp.write(json.dumps(visited))
+
 
     async def invite(self, room: MatrixRoom, event: InviteMemberEvent) -> None:
         """Callback for when an invite is received. Join the room specified in the invite.
@@ -263,3 +251,4 @@ class Callbacks:
         logger.debug(
             f"Got unknown event with type to {event.type} from {event.sender} in {room.room_id}."
         )
+

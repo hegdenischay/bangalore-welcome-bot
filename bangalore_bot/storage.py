@@ -89,7 +89,7 @@ class Storage:
         )
 
         self._execute(
-            """
+                """
                 CREATE TABLE messages (
                     id INTEGER PRIMARY KEY
                     room_id VARCHAR
@@ -97,8 +97,8 @@ class Storage:
                     message VARCHAR
                     timestamp INTEGER
                 )
-            """
-        )
+                """
+                )
 
         # Set up any other necessary database tables here
 
