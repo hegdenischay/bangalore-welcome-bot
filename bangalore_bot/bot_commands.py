@@ -40,14 +40,7 @@ class Command:
 
     async def process(self):
         """Process the command"""
-        if self.command.startswith("echo"):
-            await self._echo()
-        elif self.command.startswith("react"):
-            await self._react()
-        elif self.command.startswith("help"):
-            await self._show_help()
-        else:
-            await self._unknown_command()
+        await self._unknown_command()
 
     async def _echo(self):
         """Echo back the command's arguments"""

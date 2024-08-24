@@ -72,8 +72,8 @@ async def send_text_to_room(
 async def send_text_with_mention(
     client: AsyncClient,
     room_id: str,
-    formatted_message: str,
     message: str,
+    formatted_body: str,
     sender: str,
 ) -> Union[RoomSendResponse, ErrorResponse]:
     """Send text to a matrix room with mentions.
@@ -93,7 +93,7 @@ async def send_text_with_mention(
         "msgtype": "m.text",
         "format": "org.matrix.custom.html",
         "body": message,
-        "formatted_body": formatted_message,
+        "formatted_body": formatted_body,
         "m.mentions" : {
             "user_ids": [
                     sender
@@ -168,6 +168,33 @@ async def react_to_event(
         "m.reaction",
         content,
         ignore_unverified_devices=True,
+    )
+
+async def find_admins_and_reply(
+        client: AsyncClient,
+        room_id: str,
+        event_id: str,
+        reply_text: str,
+        admins: list,
+) -> Union[Response, ErrorResponse]:
+    # find the admins somehow
+    content = {
+            "body": reply_text,
+            "m.mentions": {
+                "user_ids": admins
+                },
+            "m.relates_to": {
+                "m.in_reply_to": {
+                        "event_id": event_id
+                    }
+                },
+            "msgtype": "m.text"
+            }
+    return await client.room_send(
+            room_id,
+            "m.room.message",
+            content,
+            ignore_unverified_devices=True,
     )
 
 

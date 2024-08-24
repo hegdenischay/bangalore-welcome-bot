@@ -105,13 +105,13 @@ class Callbacks:
         # directly inferred from https://spec.matrix.org/v1.8/client-server-api/#mroommember
         if membership == "join" and old_event == "invite" and "bangalorebot" not in sender and sender not in visited:
             # send invititation message
-            formatted_message = f"Hi <a href=\"https://matrix.to/#/{sender.replace('@', '%40').replace(':', '%3A')}\">{sender_name}</a>, welcome to our community!\n\nPlease introduce yourself :)\n\nTell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)"
+            formatted_message = f"<p>Hi <a href=\"https://matrix.to/#/{sender.replace('@', '%40').replace(':', '%3A')}\">{sender_name}</a>, welcome to our community!</p>\n\n<p>Please introduce yourself :)</p>\n\n<p>Tell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)</p>"
             message = f"Hi {sender_name}, welcome to our community!\n\nPlease introduce yourself :)\n\nTell us about what you do, where you're from, what you like or where do you live so we can figure out your vibe:)"
             await send_text_with_mention(
                 self.client,
                 room.room_id,
-                formatted_message,
                 message,
+                formatted_message,
                 sender,
             )
             visited[sender] = True
