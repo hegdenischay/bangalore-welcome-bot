@@ -58,6 +58,9 @@ class Message:
     async def _tag_admins(self) -> None:
         """Send a message responding to this one, tagging admins"""
         text = "Tagging all admins"
+        # what are power levels?
+        # https://matrix.org/docs/chat_basics/private-group-chat/#keeping-the-group-safe
+        # mautrix-whatsapp generally uses 50 for WhatsApp admins and 100 for the bridge bot
         all_users = self.room.power_levels.users
         admins = [user for user, level in all_users.items() if level >= 50 and 'whatsappbot' not in user]
         await find_admins_and_reply(self.client, self.room.room_id, self.event.event_id, text, admins)
