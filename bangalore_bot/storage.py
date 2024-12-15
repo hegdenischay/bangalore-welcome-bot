@@ -99,6 +99,16 @@ class Storage:
                 )
                 """
                 )
+        self._execute(
+                """
+                CREATE TABLE birthdays (
+                sender VARCHAR PRIMARY KEY
+                birth_month INTEGER
+                birth_day INTEGER
+                birth_year INTEGER
+                )
+                """
+                )
 
         # Set up any other necessary database tables here
 

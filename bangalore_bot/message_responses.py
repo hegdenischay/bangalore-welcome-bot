@@ -45,22 +45,15 @@ class Message:
         """Process and possibly respond to the message"""
         if self.message_content.lower() == "hello world":
             await self._hello_world()
-        if self.message_content.lower() == "@admin":
-            await self._tag_admins()
-        if self.message_content.lower() == "@admins":
-            await self._tag_admins()
 
     async def _hello_world(self) -> None:
         """Say hello"""
         text = "Hello, world!"
         await send_text_to_room(self.client, self.room.room_id, text)
 
-    async def _tag_admins(self) -> None:
+    async def tag_admins(self) -> None:
         """Send a message responding to this one, tagging admins"""
         text = "Tagging all admins"
-        # what are power levels?
-        # https://matrix.org/docs/chat_basics/private-group-chat/#keeping-the-group-safe
-        # mautrix-whatsapp generally uses 50 for WhatsApp admins and 100 for the bridge bot
         all_users = self.room.power_levels.users
         admins = [user for user, level in all_users.items() if level >= 50 and 'whatsappbot' not in user]
         await find_admins_and_reply(self.client, self.room.room_id, self.event.event_id, text, admins)

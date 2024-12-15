@@ -1,5 +1,7 @@
 import logging
 from typing import Optional, Union
+import time
+import random
 
 from markdown import markdown
 from nio import (
@@ -60,12 +62,21 @@ async def send_text_to_room(
         content["m.relates_to"] = {"m.in_reply_to": {"event_id": reply_to_event_id}}
 
     try:
-        return await client.room_send(
+        await client.room_typing(
+                room_id,
+                typing_state=True
+                )
+        time.sleep(random.randint(1,5))
+        await client.room_send(
             room_id,
             "m.room.message",
             content,
             ignore_unverified_devices=True,
         )
+        return await client.room_typing(
+                room_id,
+                typing_state=False
+                )
     except SendRetryError:
         logger.exception(f"Unable to send message response to {room_id}")
 
@@ -101,12 +112,21 @@ async def send_text_with_mention(
             },
     }
     try:
-        return await client.room_send(
+        await client.room_typing(
+                room_id,
+                typing_state=True
+                )
+        time.sleep(random.randint(1,5))
+        await client.room_send(
             room_id,
             "m.room.message",
             content,
             ignore_unverified_devices=True,
         )
+        return await client.room_typing(
+                room_id,
+                typing_state=False
+                )
     except SendRetryError:
         logger.exception(f"Unable to send message response to {room_id}")
 
@@ -179,7 +199,9 @@ async def find_admins_and_reply(
 ) -> Union[Response, ErrorResponse]:
     # find the admins somehow
     content = {
+            "formatted_body": reply_text,
             "body": reply_text,
+            "format": "org.matrix.custom.html", 
             "m.mentions": {
                 "user_ids": admins
                 },
@@ -194,7 +216,7 @@ async def find_admins_and_reply(
             room_id,
             "m.room.message",
             content,
-            ignore_unverified_devices=True,
+            ignore_unverified_devices=False,
     )
 
 

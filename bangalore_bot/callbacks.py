@@ -81,6 +81,9 @@ class Callbacks:
 
     async def user_invited(self, room: MatrixRoom, event: RoomMemberEvent) -> None:
         """ Callback for when user is invited in room"""
+        if room.room_id != os.getenv("MAIN_ROOM"):
+            print("Not posting welcome message in non-main room:", room.room_id)
+            return
         membership = event.membership
         # only care about joins
         sender = event.state_key
